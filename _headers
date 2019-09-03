@@ -1,0 +1,2 @@
+/csp-img-src.html
+    Content-Security-Policy: img-src 'self'
